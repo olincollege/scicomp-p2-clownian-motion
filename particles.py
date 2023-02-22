@@ -9,6 +9,9 @@ class Particles:
         self.ylim = ysize/2
 
     def add_particle(self, tag, r):
+        # separate x and y coordinates
+        #   doubles # of matrix operations
+        #   BUT makes it more ergonomic to check neighbors &tc.
         new_particle = {'n': tag, 'r': r, 'px': -3.9, 'py': 0, 'vx': 1, 'vy': 1}
         self.particles = pd.concat([self.particles, pd.DataFrame(new_particle, index=[0])])
 
@@ -29,11 +32,22 @@ class Particles:
         self.particles['py'].loc[y_overlap] += 2 * self.particles['vy'].loc[y_overlap] * timestep
 
 
+        # notes for adding inter-particle collision
+        # project the points across several axes (x=0, y=0, y=x, y=-x?)
+        # AND each axis to get every particle that is potentially colliding
+        # and then brute-force among those
 
 if __name__ == "__main__":
+    # initialize a default 10x10 array, center of (0,0)
     pars = Particles(10, 10)
+
+    # do all the particle adding here
     pars.add_particle(0, 1)
+
+    # print the initial state
+    # essential for getting the headers to plot
+    print(f"time,{','.join(map(str,pars.particles.columns.to_list()))}")
+    
     for i in range(0, 100):
-        print(f"TIMESTEP: {i} : -------------------------------------------")
+        print(f"{i},{pars.particles.to_csv(index=False, header=False)}".strip())
         pars.move_particles(0.1)
-        print(pars.particles)
