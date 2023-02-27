@@ -11,10 +11,12 @@ class Particles:
         self.ylim = ysize/2
 
     def add_particle(self, tag, r, m, px, py, vx, vy):
-        new_particle = pd.DataFrame([[tag, r, m, px, py, vx, vy]], columns=['n', 'r', 'm', 'px', 'py', 'vx', 'vy'])
+        # new_particle = pd.DataFrame([[tag, r, m, px, py, vx, vy]], columns=['n', 'r', 'm', 'px', 'py', 'vx', 'vy'])
 
-        # there may be a better way to do this?
-        self.particles = pd.concat([self.particles, new_particle], ignore_index=True)
+        # # there may be a better way to do this?
+        # self.particles = pd.concat([self.particles, new_particle], ignore_index=True)
+
+        self.particles.loc[len(self.particles.index)] = [tag, r, m, px, py, vx, vy] 
 
     def move_particles(self, timestep):
         pos_df = self.particles[['px','py']]
