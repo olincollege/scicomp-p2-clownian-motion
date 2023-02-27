@@ -1,5 +1,4 @@
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
 
 # Import data
@@ -13,26 +12,66 @@ for name, group in groups:
     frames.append(go.Frame(data=[go.Scatter(x=group["px"], y=group["py"], 
                                             mode="markers", marker={'size': group["r"], 
                                                                     'sizemode': 'diameter',
-                                                                    'sizeref': 2.*max(group["r"])/11.**2}
+                                                                    'sizeref': 2.*max(group["r"])/11.**2} # TODO: Look into using pi*r**2 to more accurately depict area
     )])) 
+
+# Define menu attributes
+menu_dict = {
+    "buttons": [ 
+        { # Add play button
+            "args": [None, {"frame": {"duration": 500, "redraw": False},
+                            "fromcurrent": True, "transition": {"duration": 300,
+                                                                "easing": "quadratic-in-out"}}],
+            "label": "Play",
+            "method": "animate"
+        },
+        { # Add pause button
+            "args": [[None], {"frame": {"duration": 0, "redraw": False},
+                            "mode": "immediate",
+                            "transition": {"duration": 0}}],
+            "label": "Pause",
+            "method": "animate"
+        }
+    ],
+    "direction": "left",
+    "pad": {"r": 10, "t": 87},
+    "showactive": False,
+    "type": "buttons",
+    "x": 0.1,
+    "xanchor": "right",
+    "y": 0,
+    "yanchor": "top"
+}
+
+# Define slider attributes
+# TODO: FINISH ADDING SLIDER https://plotly.com/python/animations/#frames
+slider_dict = {
+    "active": 0,
+    "yanchor": "top",
+    "xanchor": "left",
+    "transition": {"duration": 300, "easing": "cubic-in-out"},
+    "pad": {"b": 10, "t": 50},
+    "len": 0.9,
+    "x": 0.1,
+    "y": 0,
+    "steps": []
+}
 
 # Build figure
 fig = go.Figure(
     # Initalize markers at initial points
-    data=[go.Scatter(x=frame1["px"], y=frame1["py"], mode="markers", marker={'size': [100]})],
+    data=[go.Scatter(x=frame1["px"], y=frame1["py"], mode="markers", marker={'size': group["r"], 
+                                                                    'sizemode': 'diameter',
+                                                                    'sizeref': 2.*max(group["r"])/11.**2})],
     # Set layout of figure
     layout=go.Layout(
         xaxis=dict(range=[-7, 7], autorange=False),
         yaxis=dict(range=[-7, 7], autorange=False),
         width=600,
         height=600,
-        # Add play button
-        updatemenus=[dict(
-            type="buttons",
-            buttons=[dict(label="Play",
-                          method="animate",
-                          args=[None])])]
-),
+        updatemenus=[menu_dict],
+        sliders=[slider_dict]
+    ),
     frames=frames
 ) 
 
@@ -44,3 +83,4 @@ fig.add_shape(type="rect",
 )
 
 fig.show()
+
