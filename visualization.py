@@ -1,18 +1,19 @@
-# Source: https://plotly.com/python/animations/
-
 import pandas as pd
 import plotly.express as px
 
-# Initialize test data 
-data = {'ind': [0, 0 , 0, 0],
-        'time': [0, 1, 2, 3],
-        'x': [3, 3.25, 3.5, 3.75], 
-        'y': [5, 5.25, 5.5, 5.75],
-        'r': [1, 1, 1, 1]}
+# Import data
+df = pd.read_csv('data.csv')
 
-df = pd.DataFrame(data)
+fig = px.scatter(df, x="px", y="py", animation_frame="time", animation_group="n",
+           size="r", range_x=[-7,7], range_y=[-7,7])
 
-fig = px.scatter(df, x="x", y="y", animation_frame="time", animation_group="ind",
-           size="r", range_x=[0,10], range_y=[0,10])
+# Add borders of box
+fig.add_shape(type="rect",
+    xref="x", yref="y",
+    x0=-5, y0=-5,
+    x1=5, y1=5,
+)
+
+# TODO: Figure out how to specify circle sizes
 
 fig.show()
