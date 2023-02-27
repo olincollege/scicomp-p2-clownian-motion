@@ -4,8 +4,10 @@ from scipy import spatial as sp
 
 class Particles:
     def __init__(self, xsize, ysize):
-        # name, radius, x position, y position, x velocity, y velocity
-        self.particles = pd.DataFrame(columns=['n', 'r', 'm', 'px', 'py', 'vx', 'vy'])
+        # name, radius, mass, x position, y position, x velocity, y velocity
+        # includes dummy timestamp value to be changed later
+        self.particles = pd.DataFrame(columns=['time', 'n', 'r', 'm', 'px', 'py', 'vx', 'vy'])
+
         # center box on (0,0)
         self.xlim = xsize/2
         self.ylim = ysize/2
@@ -16,7 +18,7 @@ class Particles:
         # # there may be a better way to do this?
         # self.particles = pd.concat([self.particles, new_particle], ignore_index=True)
 
-        self.particles.loc[len(self.particles.index)] = [tag, r, m, px, py, vx, vy] 
+        self.particles.loc[len(self.particles.index)] = [0, tag, r, m, px, py, vx, vy]
 
     def move_particles(self, timestep):
         pos_df = self.particles[['px','py']]
@@ -27,20 +29,19 @@ class Particles:
         masses = self.particles['m'].to_numpy()
         rad = self.particles['r'].to_numpy()
 
-        # this has issues -- probably good enough for now
+        # this only really works for particles with the same size
+        # good enough for now, will accept suggestions on how to generalize
         thresholds = (2 * rad)
 
         ## A PRIORI PARTICLE COLLISION
         # grab distances between particles
-        print(pos_df)
-        print((pos_df['px'].iloc[1]))
         distances = sp.distance.cdist(pos_df, pos_df)
 
         # create a map of colliding particles
         colliding = (0 < distances) & (distances <= thresholds)
 
         # calculate mass scalars
-        mass_scalars = np.divide((2 * np.matmul(colliding, masses)), (m + np.matmul(colliding, masses)))
+        mass_scalars = np.divide((2 * np.matmul(colliding, masses)), (masses + np.matmul(colliding, masses)))
 
         # calculate velocity scalars
         delta = pos - np.matmul(colliding, pos)
@@ -75,12 +76,14 @@ if __name__ == "__main__":
     pars = Particles(10, 10)
 
     # do all the particle adding here
-    pars.add_particle(0, 1, 1, 3, 3, 1, 1.5)
-    pars.add_particle(1, 1, 1, 1, 1, -1, -1.5)
+    pars.add_particle(0.0, 1.0, 1.0, 3.0, 0.0, 1.0, 0.1)
+    pars.add_particle(1.0, 1.0, 1.0, -3.0, 0.0, -1.0, -0.1)
 
     # essential for getting the headers to plot
-    print(f"time,{','.join(map(str,pars.particles.columns.to_list()))}")
+    print(f"{','.join(map(str,pars.particles.columns.to_list()))}")
     
-    for i in range(0, 50):
-        print(f"{i},{pars.particles.to_csv(index=False, header=False)}".strip())
+    for i in range(0, 100):
+        pars.particles['time'] = i
+        # print(f"{i},{pars.particles.to_csv(index=False, header=False)}".strip())
+        print(f"{pars.particles.to_csv(index=False,header=False)}".strip())
         pars.move_particles(0.1)
