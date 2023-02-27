@@ -1,38 +1,67 @@
 import numpy as np
-from scipy import spatial as sp
 import pandas as pd
+from scipy import spatial as sp
 
 class Particles:
     def __init__(self, xsize, ysize):
         # name, radius, x position, y position, x velocity, y velocity
-        self.particles = pd.DataFrame(columns=['n', 'r', 'px', 'py', 'vx', 'vy'])
+        self.particles = pd.DataFrame(columns=['n', 'r', 'm', 'px', 'py', 'vx', 'vy'])
         # center box on (0,0)
         self.xlim = xsize/2
         self.ylim = ysize/2
 
-    def add_particle(self, tag, r):
-        new_particle = {'n': tag, 'r': r, 'px': -3.9, 'py': 0, 'vx': 1, 'vy': 1}
+    def add_particle(self, tag, r, m, px, py, vx, vy):
+        new_particle = pd.DataFrame([[tag, r, m, px, py, vx, vy]], columns=['n', 'r', 'm', 'px', 'py', 'vx', 'vy'])
 
         # there may be a better way to do this?
-        self.particles = pd.concat([self.particles, pd.DataFrame(new_particle, index=[0])])
+        self.particles = pd.concat([self.particles, new_particle], ignore_index=True)
 
     def move_particles(self, timestep):
-        pos = self.particles[['px','py']].to_numpy()
+        pos_df = self.particles[['px','py']]
+        pos = pos_df.to_numpy()
         vel = self.particles[['vx','vy']].to_numpy()
+
+        # these two are read-only
+        masses = self.particles['m'].to_numpy()
         rad = self.particles['r'].to_numpy()
 
+        # this has issues -- probably good enough for now
+        thresholds = (2 * rad)
+
+        ## A PRIORI PARTICLE COLLISION
+        # grab distances between particles
+        print(pos_df)
+        print((pos_df['px'].iloc[1]))
+        distances = sp.distance.cdist(pos_df, pos_df)
+
+        # create a map of colliding particles
+        colliding = (0 < distances) & (distances <= thresholds)
+
+        # calculate mass scalars
+        mass_scalars = np.divide((2 * np.matmul(colliding, masses)), (m + np.matmul(colliding, masses)))
+
+        # calculate velocity scalars
+        delta = pos - np.matmul(colliding, pos)
+        dot = np.sum((vel - np.matmul(colliding, vel)) * (delta), axis = 1)
+        mag = np.square(np.sqrt(np.sum(np.square(delta), axis = 1)))
+
+        # update velocity vectors
+        vel -= mass_scalars * np.transpose(np.divide(dot, mag)) * delta 
+
+        ## MOVE PARTICLES TO POST-PARTICLE COLLISION LOCATIONS
         pos += vel * timestep
 
-        # create two overlap columns 
-        overlap = (abs(pos) + rad) >= [self.xlim, self.ylim]
+        ## A POSTERIORI WALL COLLISION
+        # create 2d array to represent what particles overlap with what walls
+        wall_overlapping = (abs(pos) + rad) >= [self.xlim, self.ylim]
 
         # take advantage of True == 1 & False == 0
-        # (-2 * overlap + 1) converts True, False into Negative, Positive
-        # so if overlap == True, that vector is inverted
-        vel *= (-2 * overlap + 1)
+        # (-2 * wall_overlapping + 1) converts True, False into Negative, Positive
+        # so if wall_overlapping == True, that vector is inverted
+        vel *= (-2 * wall_overlapping + 1)
 
-        # a posteriori move particles to where they should be post-collision
-        pos += 2 * overlap * vel * timestep
+        # move particles to where they should be post-collision
+        pos += 2 * wall_overlapping * vel * timestep
 
         # ensure the particles array holds the new pos/vel values
         # to_numpy() does not guarantee that it returns a view rather than a copy
@@ -44,7 +73,8 @@ if __name__ == "__main__":
     pars = Particles(10, 10)
 
     # do all the particle adding here
-    pars.add_particle(0, 1)
+    pars.add_particle(0, 1, 1, 3, 3, 1, 1.5)
+    pars.add_particle(1, 1, 1, 1, 1, -1, -1.5)
 
     # essential for getting the headers to plot
     print(f"time,{','.join(map(str,pars.particles.columns.to_list()))}")
