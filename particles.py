@@ -115,4 +115,4 @@ if __name__ == "__main__":
         pars.particles["time"] = i
         # print(f"{i},{pars.particles.to_csv(index=False, header=False)}".strip())
         print(f"{pars.particles.to_csv(index=False,header=False)}".strip())
-        pars.move_particles(0.001)
+        pars.move_particles(0.005)
