@@ -8,19 +8,12 @@ frames = []
 groups = df.groupby("time")
 frame1 = groups.get_group((list(groups.groups)[0]))
 
-for name, group in groups:
-    frames.append(go.Frame(data=[go.Scatter(x=group["px"], y=group["py"], 
-                                            mode="markers", marker={'size': group["r"], 
-                                                                    'sizemode': 'diameter',
-                                                                    'sizeref': 2.*max(group["r"])/11.**2} # TODO: Look into using pi*r**2 to more accurately depict area
-    )])) 
-
 # Define menu attributes
 menu_dict = {
     "buttons": [ 
         { # Add play button
-            "args": [None, {"frame": {"duration": 500, "redraw": False},
-                            "fromcurrent": True, "transition": {"duration": 300,
+            "args": [None, {"frame": {"duration": 50, "redraw": False},
+                            "fromcurrent": True, "transition": {"duration": 25,
                                                                 "easing": "quadratic-in-out"}}],
             "label": "Play",
             "method": "animate"
@@ -44,18 +37,42 @@ menu_dict = {
 }
 
 # Define slider attributes
-# TODO: FINISH ADDING SLIDER https://plotly.com/python/animations/#frames
+# TODO: FINISH ADDING SLIDER 
 slider_dict = {
     "active": 0,
     "yanchor": "top",
     "xanchor": "left",
-    "transition": {"duration": 300, "easing": "cubic-in-out"},
+    "currentvalue": {
+        "font": {"size": 20},
+        "prefix": "Time:",
+        "visible": True,
+        "xanchor": "right"
+    },
+    "transition": {"duration": 50, "easing": "cubic-in-out"},
     "pad": {"b": 10, "t": 50},
     "len": 0.9,
     "x": 0.1,
     "y": 0,
     "steps": []
 }
+
+for name, group in groups:
+    frames.append(go.Frame(data=[go.Scatter(x=group["px"], y=group["py"], 
+                                            mode="markers", marker={'size': group["r"], 
+                                                                    'sizemode': 'diameter',
+                                                                    'sizeref': 2.*max(group["r"])/11.**2} # TODO: Look into using pi*r**2 to more accurately depict area
+    )])) 
+
+    slider_step = {"args": [
+        [name],
+        {"frame": {"duration": 50, "redraw": False},
+         "mode": "immediate",
+         "transition": {"duration": 25}}
+    ],
+        "label": name,
+        "method": "animate"}
+    
+    slider_dict["steps"].append(slider_step)
 
 # Build figure
 fig = go.Figure(
