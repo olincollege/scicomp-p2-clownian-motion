@@ -5,6 +5,11 @@ Python script that models Brownian motion of particles and hopefully, eventually
 
 ## Structure
 
+* `particles.py` - performs all particle simulation calculations.
+* `data.csv` - contains data output of simulation.
+* `plot_collisions.py` - outputs live simulation of the particles moving over time. 
+* `plot_MSD.py` - outputs plot of the particles' mean square displacement over time.
+
 ## Setup
 
 1. Clone the repository.  
@@ -13,11 +18,13 @@ Python script that models Brownian motion of particles and hopefully, eventually
 
 ## Run
 
-1. Run `python particles.py` to run our simulation. The output of this simulation should be saved to a file called data.csv; in the command-line, this can be done with `python particles.py > data.csv`.
-2. Run `python visualization.py` to see a visualization of the simulation.
-3. Run `python plot_MSD.py` to see a plot of the particles' mean square distance over time.
+1. Run `python particles.py` to run our simulation. 
+2. Run `python particles.py > data.csv` to save the output of the simulation to a file called data.csv.
+3. Run `python plot_collisions.py` to see a live simulation of the particles moving over time.
+4. Run `python plot_MSD.py` to see a plot of the particles' mean square displacement over time.
 
-## Model
-
+*Note: All plots open in a separate browser window.*
 
 ## Results
+
+Below are the outputs of
