@@ -3,6 +3,8 @@ Authored by @zbwrm (Aydin O'Leary) and @mmadanguit (Marion Madanguit).
 
 Python script that models Brownian motion of particles and hopefully, eventually, colloidal glass transitions.
 
+## Structure
+
 ## Setup
 
 1. Clone the repository.  
@@ -14,3 +16,8 @@ Python script that models Brownian motion of particles and hopefully, eventually
 1. Run `python particles.py` to run our simulation. The output of this simulation should be saved to a file called data.csv; in the command-line, this can be done with `python particles.py > data.csv`.
 2. Run `python visualization.py` to see a visualization of the simulation.
 3. Run `python plot_MSD.py` to see a plot of the particles' mean square distance over time.
+
+## Model
+
+
+## Results
